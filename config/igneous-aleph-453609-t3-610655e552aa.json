@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "igneous-aleph-453609-t3",
+  "private_key_id": "610655e552aa06893d7554ee62dc369191998f43",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCPpRNcsv+8lPvd\nP2NVmgp1v5P+0oLV4D7q69mGpMSTHmVn3tnO4OVmfrP2an2FV5JnHZP0hIaE8QI2\nzp+HiZHRK4F7zbTIfAc+MnW8cor/dhMFHiDNgRpGwDz7DEwvYKi4pbftE//zQIQY\nAkKk5TfnN1HGrITzwxq9iuboN5Rx20J7nWQe9vgtEawIpiG7vp9CldytDHEBGkP2\nd49Dp8OYsdsYu5ZE6GULdpT1f/8Y7YiSYihe8fctEFyafDjK72zdL6Da9jRppgc3\nIvhrncKA58a7sYGIBuyXnk0C+iKjTMpXQlOiMK2Lw7wgCzxhltbbViY39Etq0N15\neGtFsou7AgMBAAECggEAD2lnL+l2nc2gTkcoSb1qxOJmpw8AAaF7LqpaXuNbwesf\ndysGVHd1tW7/sP8Q85cHOrAGOVRkuGvBUI8Pt7OPZRFVZaqW7HG+NzKjxjHF7w3E\nkaZ/X30sDA5BHLBfli+5OoJxPusH6Znw8kB/1QBQ5KpfSEEnTJ4QxuhZyO15rFNw\nYZSs8ypaGQ2iYMjcHXMVwa56itTecLmE5gRhZ05rN+8W1LN7CSfe7OLh4Wi1Pdqg\nI3wm84P7FmggFBiuw+rHPNliDOk9H87QzL9/fAsF5PsmvpxQ5vl1/7hl/4/dVzqM\n5Ruh/3ecipoq0BcEUO2bPR5O0K4ThxpAzwL8P413DQKBgQDC0cvoRbpFqaBIoF/E\nplVI2jDnIDS/EuUgfCbNXdYkzE+rDKyWNJeQQbdD0IDTBuYRPQmcFLwIWbJnyUPF\n/MEMEZ7eb+az3K07oEit3BaYAezKe59IMmbCUkYrS1faAPsPPVxytiWON7hxF52o\nvD9IKbzjrHn3p0C5EcZQivc+dwKBgQC8wSv0nkzoRdCKxFKi+Za69LNffCclDEN1\n4pOfcwg7FVVKLVw2TluRiKz+hmuWpsJPaI76zI1l/ebLd+c1vwi1dNaTHTFAList\n8StKKJ8khmfonfbTp9twChg6edZG/gixVpH5M8fXQG5X0iHe3a+DFvlS5GzwmfBe\n5wVEohgZ3QKBgBtDJoircUScVxyyrJQlPpwCRIOjYx4187BXD0r/zZ66pI9oJ6Kh\nW3BJce7gd5aQSZOx+e1IjYORocCaToyfMRiSQqwX9q3GvMsyQ9loihTdeBhhskl1\nHCInR0B5u6J7LqbUTGKVEK5VJ89TobFiHmznwlIN6cd5NTpwvVK6D51DAoGAV+7a\nDlyM0YxsqajqIniJ6tDCm5IYHl9HMiz6vsZ1KCk5EZRuJ/J7ICJ/DRgMGSPY0+uO\n6HHQ0ZnmIhXaxaQYZ4hlyiVIY3DetslqdGLWOMrQr4KfkVzakqhxPxSxaWNBI3SE\nDoc76yBeB1WiZ9P4xuY2ApLd2XytiViwkJe/CJUCgYEAkbf14Cq3T9yX+fUu7znX\nGpdzl7b66mBlN+o4gxzgFJKOHvsogIcsIbNll6g2/kALFITGBEjw9bhYtCUTm1pB\nVGBjKGeD9N3fYyMuMNhd9bX9icaUnO2yJvdPi4ZbetZhwxW7Xmrs9WiGlX1TI8FU\nU+JDzDAr5AQB6Ir0KnVddyI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "expensetrackerserviceaccount@igneous-aleph-453609-t3.iam.gserviceaccount.com",
+  "client_id": "117776392047878111665",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/expensetrackerserviceaccount%40igneous-aleph-453609-t3.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
