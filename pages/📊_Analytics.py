@@ -21,7 +21,7 @@ load_dotenv()
 def get_google_sheets_service():
     """Cache Google Sheets credentials and service"""
     try:
-        creds = service_account.Credentials.from_service_account_file(
+        creds = service_account.Credentials.from_service_account_info(
             st.secrets["gcp_service_account"],
             scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
