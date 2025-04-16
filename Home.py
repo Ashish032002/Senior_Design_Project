@@ -226,7 +226,7 @@ st.markdown('<div class="main-title">💬 Smart Assistant</div>', unsafe_allow_h
 st.markdown('<div class="instruction">Type a message like "I spent 500 on groceries yesterday" or just say hi!</div>', unsafe_allow_html=True)
 st.divider()
 
-
+'''
 # Configure Gemini AI
 @st.cache_resource
 def get_gemini_model() -> Any:
@@ -246,6 +246,48 @@ try:
     model = get_gemini_model()
     service = get_sheets_service()
     SHEET_ID: str | None = os.getenv('GOOGLE_SHEET_ID')
+    log.info("Google Sheets API connected successfully")
+except Exception as e:
+    log.error(f"Failed to connect to Google Sheets: {str(e)}")
+    log.error(f"Failed to initialize services: {str(e)}")
+    sys.exit(1)
+'''
+
+@st.cache_resource
+def get_gemini_model() -> Any:
+    """Cache Gemini AI configuration"""
+    try:
+        
+        try:
+            api_key = st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            from dotenv import load_dotenv
+            load_dotenv()
+            import os
+            api_key = os.getenv("GEMINI_API_KEY")
+
+        genai.configure(api_key=api_key)
+        model: Any = genai.GenerativeModel('gemini-1.5-flash')  # type: ignore
+        log.info("Gemini AI configured successfully")
+        return model
+    except Exception as e:
+        log.error(f"Failed to configure Gemini AI: {str(e)}")
+        raise
+
+
+try:
+    model = get_gemini_model()
+    service = get_sheets_service()
+
+   
+    try:
+        SHEET_ID = st.secrets["GOOGLE_SHEET_ID"]
+    except Exception:
+        from dotenv import load_dotenv
+        load_dotenv()
+        import os
+        SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
+
     log.info("Google Sheets API connected successfully")
 except Exception as e:
     log.error(f"Failed to connect to Google Sheets: {str(e)}")
