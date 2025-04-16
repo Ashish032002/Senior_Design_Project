@@ -19,12 +19,12 @@ def get_sheets_service():
     ##    raise e
 
     try:
+        # Try secrets-based credentials (for Streamlit Cloud)
         credentials = service_account.Credentials.from_service_account_info(
             st.secrets["gcp_service_account"]
         )
-        print("Credentials loaded")
-    
-        service = build('sheets', 'v4', credentials=credentials)
-        print("Google Sheets service built")
+        print("Credentials loaded")  # Just for sanity check
+        return build("sheets", "v4", credentials=credentials)
     except Exception as e:
-        st.error(f" Google Sheets failed: {e}")
+        print(f"❌ Failed to load credentials from secrets: {e}")
+        return None  # Prevents crashing in Home.py
