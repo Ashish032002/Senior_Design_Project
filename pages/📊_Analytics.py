@@ -22,7 +22,7 @@ def get_google_sheets_service():
     """Cache Google Sheets credentials and service"""
     try:
         creds = service_account.Credentials.from_service_account_file(
-            os.getenv('GOOGLE_SHEETS_CREDENTIALS'),
+            st.secrets["gcp_service_account"],
             scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
         service = build('sheets', 'v4', credentials=creds)
@@ -34,7 +34,8 @@ def get_google_sheets_service():
 # Initialize service and sheet ID
 try:
     service = get_google_sheets_service()
-    SHEET_ID = os.getenv('GOOGLE_SHEET_ID')
+    SHEET_ID = st.secrets["GOOGLE_SHEET_ID"]
+
 except Exception:
     st.error("Failed to connect to Google Sheets. Please check your credentials.")
     sys.exit(1)
