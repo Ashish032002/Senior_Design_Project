@@ -17,6 +17,90 @@ st.set_page_config (layout='wide')
 # Load environment variables
 load_dotenv()
 
+import streamlit as st
+
+st.markdown("""
+    <style>
+    html, body, [class*="css"] {
+        background-color: #fffbea !important;
+        color: #2c2c2c;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .stApp,
+    .main,
+    .block-container,
+    .css-1dp5vir,
+    .css-ffhzg2 {
+        background-color: #fffbea !important;
+    }
+
+    header[data-testid="stHeader"],
+    footer {
+        background-color: #fffbea !important;
+        box-shadow: none;
+    }
+
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(to bottom right, #fdf2d5, #fae1aa);
+        border-right: 2px solid #e5c97b;
+        box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stSidebar > div {
+        padding: 20px 10px;
+    }
+
+    .stButton > button {
+        background: linear-gradient(135deg, #f1c40f, #f39c12);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #e67e22, #f39c12);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .stMetric {
+        background-color: #fffbde;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border: 1px solid #ffe69a;
+        text-align: center;
+    }
+
+    .stDataFrame {
+        border: 1px solid #ffe69a;
+        background-color: #fffef4;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .js-plotly-plot {
+       background-color: transparent !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #f1c40f;
+        border-radius: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 @st.cache_resource
 def get_google_sheets_service():
     """Cache Google Sheets credentials and service"""
