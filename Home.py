@@ -188,51 +188,194 @@ if st.sidebar.button("📊 Toggle Analytics View"):
     st.session_state.show_analytics = not st.session_state.show_analytics
 log.info(f"Analytics view toggled: {st.session_state.show_analytics}")
     
-# --- Header ---
-st.sidebar.markdown("""
+st.markdown("""
     <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(to bottom right, #fdecc3, #fff3b0);
-        border-right: 1px solid #f9d57e;
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
-        padding: 2rem 1.2rem;
+
+    /* === Base and Background === */
+    html, body, [class*="css"] {
+        background-color: #fffbea !important;
+        color: #2c2c2c;
         font-family: 'Segoe UI', sans-serif;
     }
 
-    .sidebar-content h1 {
-        font-size: 1.4rem;
-        color: #b35b00;
-        margin-bottom: 0.5rem;
+    .stApp,
+    .main,
+    .block-container,
+    .css-1dp5vir,
+    .css-ffhzg2 {
+        background-color: #fffbea !important;
     }
 
-    .sidebar-content p {
+    /* === Header and Footer Background Fix === */
+    header[data-testid="stHeader"],
+    footer {
+        background-color: #fffbea !important;
+        box-shadow: none;
+    }
+
+    /* === Sidebar Styling === */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(to bottom right, #fdf2d5, #fae1aa);
+        border-right: 2px solid #e5c97b;
+        box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stSidebar > div {
+        padding: 20px 10px;
+    }
+
+    .sidebar .element-container {
+        padding: 10px;
+    }
+
+    /* === Title and Instructions === */
+    .main-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: #b37a00;
+        padding-bottom: 8px;
+    }
+
+    .instruction {
         font-size: 1.1rem;
-        color: #6e4b00;
-        line-height: 1.4;
+        color: #946b00;
+        padding-bottom: 15px;
     }
 
-    .sidebar-button button {
-        width: 100%;
-        background: linear-gradient(to right, #f9c802, #ff9100);
-        color: #fff;
-        font-weight: 600;
-        font-size: 1rem;
+    /* === Chat Bubbles === */
+    .stChatMessage.user {
+        background: #fff6d9;
+        border-left: 4px solid #f9be37;
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(249, 190, 55, 0.2);
+    }
+
+    .stChatMessage.assistant {
+        background: #fef3cc;
+        border-left: 4px solid #f1c40f;
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 8px rgba(241, 196, 15, 0.2);
+    }
+
+    /* === Buttons === */
+    .stButton > button {
+        background: linear-gradient(135deg, #f1c40f, #f39c12);
+        color: white;
         border: none;
+        padding: 10px 20px;
         border-radius: 8px;
-        padding: 0.75rem 1rem;
-        margin-top: 1rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-weight: bold;
+        font-size: 15px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
     }
 
-    .sidebar-button button:hover {
-        background: linear-gradient(to right, #ffac00, #ff6f00);
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #e67e22, #f39c12);
         transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     }
-    </style>
 
-    
+    /* === Form Container === */
+    .stForm {
+        background-color: #fffdf2;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        border: 1px solid #ffe69a;
+    }
+
+    /* === Select & Input === */
+    .stTextInput>div>div>input,
+    .stSelectbox>div>div>div {
+        background-color: #fffef8;
+        border: 1px solid #f4d276;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    /* === Metrics === */
+    .stMetric {
+        background-color: #fffbde;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border: 1px solid #ffe69a;
+        text-align: center;
+    }
+
+    /* === Dataframe === */
+    .stDataFrame {
+        border: 1px solid #ffe69a;
+        background-color: #fffef4;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    /* === Plotly Charts === */
+    .js-plotly-plot {
+       background-color: transparent !important;
+       border-radius: 0px;
+    }
+
+    /* === Scrollbar Customization === */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #f1c40f;
+        border-radius: 10px;
+    }
+
+    .block-container {
+        padding-top: 1.5rem;
+    }
+
+    /* === Chat Input Area Fix === */
+    .stChatInputContainer {
+        background-color: #fffbea !important;
+        border-top: 2px solid #f4d276 !important;
+        padding: 1rem !important;
+    }
+
+    input[data-baseweb="textarea"],
+    textarea[data-baseweb="textarea"] {
+        background-color: #fffef2 !important;
+        color: #2c2c2c !important;
+        border: 2px solid #f5d26c !important;
+        border-radius: 20px !important;
+        padding: 10px 16px !important;
+        font-size: 16px !important;
+        box-shadow: none !important;
+    }
+
+    input[data-baseweb="textarea"]:focus,
+    textarea[data-baseweb="textarea"]:focus {
+        border-color: #f1c40f !important;
+        outline: none !important;
+    }
+
+    .stChatInputContainer button {
+        background-color: #f1c40f !important;
+        color: white !important;
+        border-radius: 50% !important;
+        border: none !important;
+        padding: 8px !important;
+        transition: 0.3s ease;
+    }
+
+    .stChatInputContainer button:hover {
+        background-color: #e67e22 !important;
+    }
+
+    </style>
 """, unsafe_allow_html=True)
+
 
 
 st.markdown('<div class="main-title">💬 Smart Assistant</div>', unsafe_allow_html=True)
