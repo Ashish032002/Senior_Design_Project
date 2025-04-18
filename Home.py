@@ -35,15 +35,27 @@ st.set_page_config (
 
 st.markdown("""
     <style>
-    
+
     /* === Base and Background === */
     html, body, [class*="css"] {
         background-color: #fffbea !important;
         color: #2c2c2c;
         font-family: 'Segoe UI', sans-serif;
     }
-    .stApp {
-        background-color: #fffbea;
+
+    .stApp,
+    .main,
+    .block-container,
+    .css-1dp5vir,
+    .css-ffhzg2 {
+        background-color: #fffbea !important;
+    }
+
+    /* === Header and Footer Background Fix === */
+    header[data-testid="stHeader"],
+    footer {
+        background-color: #fffbea !important;
+        box-shadow: none;
     }
 
     /* === Sidebar Styling === */
@@ -52,9 +64,11 @@ st.markdown("""
         border-right: 2px solid #e5c97b;
         box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.05);
     }
+
     .stSidebar > div {
         padding: 20px 10px;
     }
+
     .sidebar .element-container {
         padding: 10px;
     }
@@ -66,6 +80,7 @@ st.markdown("""
         color: #b37a00;
         padding-bottom: 8px;
     }
+
     .instruction {
         font-size: 1.1rem;
         color: #946b00;
@@ -81,6 +96,7 @@ st.markdown("""
         margin-bottom: 10px;
         box-shadow: 0 2px 8px rgba(249, 190, 55, 0.2);
     }
+
     .stChatMessage.assistant {
         background: #fef3cc;
         border-left: 4px solid #f1c40f;
@@ -102,6 +118,7 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
     }
+
     .stButton > button:hover {
         background: linear-gradient(135deg, #e67e22, #f39c12);
         transform: translateY(-1px);
@@ -148,13 +165,13 @@ st.markdown("""
     .js-plotly-plot {
        background-color: transparent !important;
        border-radius: 0px;
-
     }
 
     /* === Scrollbar Customization === */
     ::-webkit-scrollbar {
         width: 8px;
     }
+
     ::-webkit-scrollbar-thumb {
         background: #f1c40f;
         border-radius: 10px;
@@ -163,75 +180,67 @@ st.markdown("""
     .block-container {
         padding-top: 1.5rem;
     }
-    </style>
-""", unsafe_allow_html=True)
 
-
-
-
-# --- Sidebar ---
-st.sidebar.title("💼 Personal Finance Tracker")
-st.sidebar.markdown("Welcome! 👋\nLog your income and expenses in a smart, conversational way.")
-if "show_analytics" not in st.session_state:
-    st.session_state.show_analytics = False
-    
-with st.sidebar.expander("📈 Trending Stocks"):
-    st.markdown("- TCS")
-    st.markdown("- INFY")
-    st.markdown("- RELIANCE")
-    st.markdown("- AAPL")
-    st.markdown("- MSFT")
-    st.markdown("- GOOGL")
-    st.markdown("_Try asking: 'What's the price of TCS today?'_")
-
-if st.sidebar.button("📊 Toggle Analytics View"):
-    st.session_state.show_analytics = not st.session_state.show_analytics
-log.info(f"Analytics view toggled: {st.session_state.show_analytics}")
-    
-# --- Header ---
-st.sidebar.markdown("""
-    <style>
-    [data-testid="stSidebar"] {
-        background: linear-gradient(to bottom right, #fdecc3, #fff3b0);
-        border-right: 1px solid #f9d57e;
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
-        padding: 2rem 1.2rem;
-        font-family: 'Segoe UI', sans-serif;
+    /* === ABSOLUTE Chat Input Fix (works on all Streamlit versions) === */
+    .stChatInputContainer {
+        background-color: #fffbea !important;
+        padding: 1rem !important;
+        border-top: 2px solid #f4d276 !important;
+        box-shadow: none !important;
     }
 
-    .sidebar-content h1 {
-        font-size: 1.4rem;
-        color: #b35b00;
-        margin-bottom: 0.5rem;
+    /* Input wrapper fix */
+    .stChatInputContainer div[data-baseweb="textarea"] {
+        background-color: #fffef2 !important;
+        border-radius: 20px !important;
+        padding: 0 !important;
+        box-shadow: none !important;
     }
 
-    .sidebar-content p {
-        font-size: 1.1rem;
-        color: #6e4b00;
-        line-height: 1.4;
+    /* Textarea element fix */
+    .stChatInputContainer textarea {
+        background-color: #fffef2 !important;
+        color: #2c2c2c !important;
+        border: 2px solid #f4d276 !important;
+        border-radius: 20px !important;
+        padding: 12px 18px !important;
+        font-size: 16px !important;
+        box-shadow: none !important;
+        height: auto !important;
+        min-height: 50px !important;
+        resize: none !important;
     }
 
-    .sidebar-button button {
-        width: 100%;
-        background: linear-gradient(to right, #f9c802, #ff9100);
-        color: #fff;
-        font-weight: 600;
-        font-size: 1rem;
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        margin-top: 1rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    /* Placeholder text fix */
+    .stChatInputContainer textarea::placeholder {
+        color: #a08a4a !important;
+        opacity: 1 !important;
+    }
+
+    /* Focus style */
+    .stChatInputContainer textarea:focus {
+        border-color: #f1c40f !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Send button */
+    .stChatInputContainer button {
+        background-color: #f1c40f !important;
+        color: white !important;
+        border-radius: 50% !important;
+        border: none !important;
+        padding: 10px !important;
+        margin-left: 10px;
         transition: all 0.3s ease;
     }
 
-    .sidebar-button button:hover {
-        background: linear-gradient(to right, #ffac00, #ff6f00);
-        transform: translateY(-1px);
+    .stChatInputContainer button:hover {
+        background-color: #e67e22 !important;
     }
-    </style>
 
-    
+
+    </style>
 """, unsafe_allow_html=True)
 
 
@@ -239,35 +248,6 @@ st.markdown('<div class="main-title">💬 Smart Assistant</div>', unsafe_allow_h
 st.markdown('<div class="instruction">Type a message like "I spent 500 on groceries yesterday" or just say hi!</div>', unsafe_allow_html=True)
 st.divider()
 
-<<<<<<< HEAD
-=======
-
-# Configure Gemini AI
-##@st.cache_resource
-##def get_gemini_model() -> Any:
-##    """Cache Gemini AI configuration"""
-##    try:
-##        genai.configure(api_key=os.getenv('GEMINI_API_KEY')) # type: ignore
-##        model: Any = genai.GenerativeModel('gemini-1.5-flash') # type: ignore
-##        log.info("Gemini AI configured successfully")
-##       return model
-##   except Exception as e:
-##       log.error(f" Failed to configure Gemini AI: {str(e)}")
-##       raise
-
-
-# Replace the direct configuration with cached versions
-##try:
-##    model = get_gemini_model()
-##    service = get_sheets_service()
-##   SHEET_ID: str | None = os.getenv('GOOGLE_SHEET_ID')
-##    log.info("Google Sheets API connected successfully")
-##except Exception as e:
-##    log.error(f"Failed to connect to Google Sheets: {str(e)}")
-##    log.error(f"Failed to initialize services: {str(e)}")
-##    sys.exit(1)
-
->>>>>>> 870d112a (Updated Home.py)
 
 @st.cache_resource
 def get_gemini_model() -> Any:
