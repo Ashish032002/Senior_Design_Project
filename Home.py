@@ -239,6 +239,35 @@ st.markdown('<div class="main-title">💬 Smart Assistant</div>', unsafe_allow_h
 st.markdown('<div class="instruction">Type a message like "I spent 500 on groceries yesterday" or just say hi!</div>', unsafe_allow_html=True)
 st.divider()
 
+<<<<<<< HEAD
+=======
+
+# Configure Gemini AI
+##@st.cache_resource
+##def get_gemini_model() -> Any:
+##    """Cache Gemini AI configuration"""
+##    try:
+##        genai.configure(api_key=os.getenv('GEMINI_API_KEY')) # type: ignore
+##        model: Any = genai.GenerativeModel('gemini-1.5-flash') # type: ignore
+##        log.info("Gemini AI configured successfully")
+##       return model
+##   except Exception as e:
+##       log.error(f" Failed to configure Gemini AI: {str(e)}")
+##       raise
+
+
+# Replace the direct configuration with cached versions
+##try:
+##    model = get_gemini_model()
+##    service = get_sheets_service()
+##   SHEET_ID: str | None = os.getenv('GOOGLE_SHEET_ID')
+##    log.info("Google Sheets API connected successfully")
+##except Exception as e:
+##    log.error(f"Failed to connect to Google Sheets: {str(e)}")
+##    log.error(f"Failed to initialize services: {str(e)}")
+##    sys.exit(1)
+
+>>>>>>> 870d112a (Updated Home.py)
 
 @st.cache_resource
 def get_gemini_model() -> Any:
