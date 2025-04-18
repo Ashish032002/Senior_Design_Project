@@ -13,6 +13,10 @@ import re
 from config.constants import TRANSACTION_TYPES, CATEGORIES
 from services.google_sheets import get_sheets_service
 from utils.logging_utils import setup_logging
+from pathlib import Path
+from services.google_sheets import get_sheets_service
+import yfinance as yf
+
 
 log: Logger = setup_logging("expense_tracker")
 
@@ -170,6 +174,15 @@ st.sidebar.title("💼 Personal Finance Tracker")
 st.sidebar.markdown("Welcome! 👋\nLog your income and expenses in a smart, conversational way.")
 if "show_analytics" not in st.session_state:
     st.session_state.show_analytics = False
+    
+with st.sidebar.expander("📈 Trending Stocks"):
+    st.markdown("- TCS")
+    st.markdown("- INFY")
+    st.markdown("- RELIANCE")
+    st.markdown("- AAPL")
+    st.markdown("- MSFT")
+    st.markdown("- GOOGL")
+    st.markdown("_Try asking: 'What's the price of TCS today?'_")
 
 if st.sidebar.button("📊 Toggle Analytics View"):
     st.session_state.show_analytics = not st.session_state.show_analytics
@@ -321,7 +334,10 @@ def init_session_state() -> None:
         'current_subcategory': None,
         'form_submitted': False,
         'show_analytics': False,  # New state variable for analytics
-        'current_transaction': None,  # New state variable for current transaction
+        'current_transaction': None,
+        'stock_result': None,
+        
+        # New state variable for current transaction
     }
     
     for key, value in defaults.items():
@@ -395,6 +411,94 @@ def parse_date_from_text(text: str) -> datetime:
     except Exception as e:
         log.warning(f"Failed to parse date from text, using current date. Error: {str(e)}")
         return current_date
+    
+
+
+
+STOCK_NAME_MAP = {
+    "tcs": "TCS.NS",
+    "infosys": "INFY.NS",
+    "reliance": "RELIANCE.NS",
+    "hdfc": "HDFCBANK.NS",
+    "apple": "AAPL",
+    "google": "GOOGL",
+    "alphabet": "GOOGL",
+    "amazon": "AMZN",
+    "microsoft": "MSFT",
+    "meta": "META",
+    "tesla": "TSLA",
+    "nvidia": "NVDA"
+}
+
+def detect_stock_ticker(text: str) -> str | None:
+    text = text.lower()
+    words = re.findall(r'\b\w+\b', text)
+
+    for word in words:
+        if word in STOCK_NAME_MAP:
+            return STOCK_NAME_MAP[word]
+
+    # Try detecting uppercase tickers like GOOGL or AAPL
+    match = re.search(r'\b([A-Z]{3,6})\b', text.upper())
+    if match:
+        symbol = match.group(1)
+        known_us_tickers = list(STOCK_NAME_MAP.values()) + ["GOOGL", "AAPL", "AMZN", "MSFT", "META", "TSLA", "NVDA"]
+        if symbol in known_us_tickers:
+            return symbol
+        else:
+            return symbol + ".NS"
+
+    return None
+  
+
+
+@st.cache_data(ttl=300)
+def get_stock_data(ticker: str) -> dict[str, Any]:
+    try:
+        stock = yf.Ticker(ticker)
+
+        # Fetch historical data
+        hist = stock.history(period="1mo")
+        if hist is None or hist.empty:
+            log.error(f"❌ No historical data found for: {ticker}")
+            return {}
+
+        # Try fetching stock info safely
+        try:
+            info = stock.info
+        except Exception as e:
+            log.error(f"❌ Failed to fetch stock.info for {ticker}: {e}")
+            return {}
+
+        if not info or "shortName" not in info:
+            log.error(f"❌ Invalid stock info for: {ticker}")
+            return {}
+
+        # Return cleaned info
+        return {
+            "name": info.get("shortName", ticker),
+            "price": info.get("currentPrice", hist['Close'].iloc[-1]),
+            "currency": info.get("currency", "INR"),
+            "pe_ratio": info.get("trailingPE", "N/A"),
+            "eps": info.get("trailingEps", "N/A"),
+            "market_cap": info.get("marketCap", "N/A"),
+            "history": hist
+        }
+
+    except Exception as e:
+        log.error(f"🚨 Stock fetch failed: {str(e)}")
+        return {}
+
+
+def generate_stock_advice(prompt: str, model: Any) -> str:
+    try:
+        chat = model.start_chat(history=[])
+        response = chat.send_message(prompt)
+        return response.text.strip()
+    except Exception as e:
+        log.warning(f"Gemini stock advice failed: {str(e)}")
+        return "Unable to generate stock advice at this time."
+
 
 def test_sheet_access() -> bool:
     """
@@ -681,7 +785,10 @@ def detect_user_intent(text: str, model: Any) -> str:
         Analyze the user message: \"{text}\"
         Respond with only one word:
         - "finance" if it's related to money, expenses, income, savings etc.
+        - "stocks" — if it mentions company names, stock prices, investment, market trends
+        - "advisor" — if it asks for financial advice, money-saving tips, retirement, planning
         - "casual" if it's just chatting, greetings, questions etc.
+        
         """
         response = chat.send_message(prompt)
         return response.text.strip().lower()
@@ -862,6 +969,55 @@ def process_user_input(text: str) -> dict[str, Any]:
             
         log.info("Starting transaction processing")
         log.debug(f"Processing input: {text}")
+        
+        # Detect if this is a stock market query
+        if any(keyword in text.lower() for keyword in ["stock", "price", "market", "invest", "share"]):
+            log.info("Detected stock/finance query")
+            
+            ticker = detect_stock_ticker(text)
+            if not ticker:
+                st.chat_message("assistant").markdown("❓ I couldn't find a stock symbol. Try: *What's the price of TCS or Reliance?*")
+                return {}
+            
+            data = get_stock_data(ticker)
+            if not data:
+                st.chat_message("assistant").markdown("❌ Failed to fetch stock info. Try again later.")
+                return {}
+            
+            st.session_state.stock_result = {
+            "data": data,
+            "ticker": ticker,
+            "advice": generate_stock_advice(
+                f"Suggest a short-term and long-term investment strategy for {data['name']} stock (ticker: {ticker}) based on current price {data['price']} and general trends. Keep it beginner-friendly.",
+                model
+                )
+            }
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": f"📈 Stock insight for {data['name']} ({ticker}) saved!"
+            })
+            return {}
+            
+            # Display info
+            st.chat_message("assistant").markdown(
+                f"📈 **{data['name']} ({ticker})**\n"
+                f"💵 Current Price: `{data['price']} {data['currency']}`\n"
+                f"📊 P/E Ratio: `{data['pe_ratio']}` | EPS: `{data['eps']}`\n"
+                f"🏦 Market Cap: `{data['market_cap']}`"
+            )
+
+            # Trend chart
+            st.subheader("📉 30-Day Trend")
+            fig = px.line(data['history'], y="Close", title=f"{ticker} Price History")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Gemini advice
+            prompt = f"Suggest a short-term and long-term investment strategy for {data['name']} stock (ticker: {ticker}) based on current price {data['price']} and general trends. Keep it beginner-friendly."
+            advice = generate_stock_advice(prompt, model)
+            st.chat_message("assistant").markdown(f"💡 **Investment Strategy**:\n{advice}")
+            
+            return {}  # Do not run transaction logic
+
         
         # First, classify the transaction type
         log.debug("Step 1: Classifying transaction type")
@@ -1436,6 +1592,28 @@ def main():
         # Show transaction form if we have extracted info
         if st.session_state.current_transaction:
             show_transaction_form()
+            
+
+        # ✅ Now show stock result if available
+        if st.session_state.get('stock_result'):
+            stock = st.session_state.stock_result["data"]
+            ticker = st.session_state.stock_result["ticker"]
+            advice = st.session_state.stock_result["advice"]
+
+            st.subheader(f"📊 Stock Details: {stock['name']} ({ticker})")
+            st.markdown(f"""
+                - 💵 **Price**: `{stock['price']} {stock['currency']}`
+                - 📊 **P/E**: `{stock['pe_ratio']}` | **EPS**: `{stock['eps']}`
+                - 🏦 **Market Cap**: `{stock['market_cap']}`
+            """)
+            fig = px.line(stock['history'], y="Close", title=f"{ticker} Price Trend")
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown(f"💡 **Advice**: {advice}")
+            
+            if st.button("Clear Stock Info", key="clear_stock"):
+                st.session_state.stock_result = None
+                st.rerun()
+
     
     except Exception as e:
         log.error(f"❌ Application error: {str(e)}", exc_info=True)
