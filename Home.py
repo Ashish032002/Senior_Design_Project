@@ -11,7 +11,7 @@ import sys
 from dateutil import parser
 import re
 from config.constants import TRANSACTION_TYPES, CATEGORIES
-from services.google_sheets import get_sheets_service
+from services.google_sheets import get_sheets_service                
 from utils.logging_utils import setup_logging
 from pathlib import Path
 from services.google_sheets import get_sheets_service
@@ -903,7 +903,7 @@ def detect_user_intent(text: str, model: Any) -> str:
         Respond with only one word:
         - "finance" if it's related to money, expenses, income, savings etc.
         - "stocks" — if it mentions company names, stock prices, investment, market trends
-        - "advisor" — if it asks for financial advice, money-saving tips, retirement, planning
+        - "advisor" — if it asks for financial advice, money-saving tips, retirement, planning, investing, mutual funds, SIP, FD
         - "casual" if it's just chatting, greetings, questions etc.
         
         """
@@ -927,6 +927,28 @@ def generate_casual_reply(text: str, model: Any) -> str:
     except Exception as e:
         log.warning(f"Casual reply generation failed: {str(e)}")
         return "Hey! How can I help you today?"
+    
+def generate_financial_advice(text: str, model: Any) -> str:
+    """
+    Generate general financial advice using Gemini.
+    """
+    try:
+        chat = model.start_chat(history=[])
+        prompt = f"""
+        You are a helpful financial advisor.
+
+        User's question: "{text}"
+
+        Provide clear, simple, and actionable advice for beginners.
+        Give 2–3 practical steps if it's a generic query like “how to invest”.
+        Keep your tone friendly and clear.
+        """
+        response = chat.send_message(prompt)
+        return response.text.strip()
+    except Exception as e:
+        log.error(f"⚠️ Financial advice generation failed: {str(e)}")
+        return "Sorry, I couldn't provide advice right now. Please try again later."
+
 
 def render_chat():
     for message in st.session_state.messages:
@@ -1082,6 +1104,14 @@ def process_user_input(text: str) -> dict[str, Any]:
             st.chat_message("assistant").markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
             return {}  
+        
+        elif intent == 'advisor':
+            log.info("Generating general financial advice")
+            advice = generate_financial_advice(text, model)
+            st.chat_message("assistant").markdown(f"📘 {advice}")
+            st.session_state.messages.append({"role": "assistant", "content": advice})
+            return {}
+
         
             
         log.info("Starting transaction processing")
