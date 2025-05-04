@@ -584,29 +584,31 @@ def detect_stock_ticker(text: str) -> str | None:
   
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)
 def get_stock_data(ticker: str) -> dict[str, Any]:
+    import time
+
+    def fetch_info_with_retries(stock, max_retries=3, delay=2):
+        for attempt in range(max_retries):
+            try:
+                info = stock.info
+                if info and "shortName" in info:
+                    return info
+            except Exception as e:
+                log.warning(f"Attempt {attempt+1}: stock.info failed for {ticker}: {e}")
+                time.sleep(delay)
+        return {}
+
     try:
         stock = yf.Ticker(ticker)
-
-        # Fetch historical data
         hist = stock.history(period="1mo")
+
         if hist is None or hist.empty:
             log.error(f"❌ No historical data found for: {ticker}")
             return {}
 
-        # Try fetching stock info safely
-        try:
-            info = stock.info
-        except Exception as e:
-            log.error(f"❌ Failed to fetch stock.info for {ticker}: {e}")
-            return {}
+        info = fetch_info_with_retries(stock)
 
-        if not info or "shortName" not in info:
-            log.error(f"❌ Invalid stock info for: {ticker}")
-            return {}
-
-        # Return cleaned info
         return {
             "name": info.get("shortName", ticker),
             "price": info.get("currentPrice", hist['Close'].iloc[-1]),
@@ -618,8 +620,10 @@ def get_stock_data(ticker: str) -> dict[str, Any]:
         }
 
     except Exception as e:
-        log.error(f"🚨 Stock fetch failed: {str(e)}")
+        log.error(f"🚨 Stock fetch failed for {ticker}: {str(e)}")
+        st.warning("⚠️ Stock data temporarily unavailable. Please try again later.")
         return {}
+
 
 
 def generate_stock_advice(prompt: str, model: Any) -> str:
