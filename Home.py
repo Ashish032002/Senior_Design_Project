@@ -584,7 +584,7 @@ def detect_stock_ticker(text: str) -> str | None:
   
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600)
 def get_stock_data(ticker: str) -> dict[str, Any]:
     try:
         stock = yf.Ticker(ticker)
