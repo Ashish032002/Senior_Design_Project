@@ -1,0 +1,11 @@
+credentials:
+  usernames:
+    johndoe:
+      name: John Doe
+      email: johndoe@example.com
+      password: '$2b$12$WHuvFZp.3H7/QlorEzkz3e8HPZkDFrH3CZSVN16eVb7MTQv1BZASS'
+
+cookie:
+  name: finance_cookie
+  key: some_random_secure_key
+  expiry_days: 30

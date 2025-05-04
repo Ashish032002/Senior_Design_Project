@@ -10,9 +10,18 @@ from dotenv import load_dotenv
 from utils.logging_utils import setup_logging
 
 
+st.set_page_config (layout='wide')
+
+if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
+    st.warning("🔒 Please login to continue.")
+    st.stop()
+    
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.clear()
+    
 log = setup_logging("expense_tracker_analytics")
 
-st.set_page_config (layout='wide')
+
 
 # Load environment variables
 load_dotenv()

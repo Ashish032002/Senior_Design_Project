@@ -1,3 +1,26 @@
+import streamlit as st
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
+from pathlib import Path
+
+
+
+st.set_page_config(
+    page_title="Smart Finance Tracker",
+    page_icon="💰",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
+    st.warning("🔒 Please login to continue.")
+    st.stop()
+
+if st.sidebar.button("🚪 Logout"):
+    st.session_state.clear()
+
+
 from logging import Logger
 from typing import Any
 import streamlit as st
@@ -24,14 +47,6 @@ log: Logger = setup_logging("expense_tracker")
 load_dotenv()
 log.info("Environment variables loaded")
 
-
-
-st.set_page_config (
-    page_title="Smart Finance Tracker",
-    page_icon="💰",
-    layout="wide",
-    initial_sidebar_state="expanded"
-    )
 
 st.markdown("""
     <style>
