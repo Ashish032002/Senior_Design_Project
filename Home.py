@@ -604,11 +604,18 @@ def get_stock_data(ticker: str) -> dict[str, Any]:
         hist = stock.history(period="1mo")
 
         if hist is None or hist.empty:
-            log.error(f"❌ No historical data found for: {ticker}")
-            return {}
+            log.error(f"❌ No historical data for {ticker}")
+            return {
+                "name": ticker,
+                "price": "N/A",
+                "currency": "INR",
+                "pe_ratio": "N/A",
+                "eps": "N/A",
+                "market_cap": "N/A",
+                "history": pd.DataFrame()  # Safe default
+            }
 
         info = fetch_info_with_retries(stock)
-
         return {
             "name": info.get("shortName", ticker),
             "price": info.get("currentPrice", hist['Close'].iloc[-1]),
@@ -616,13 +623,21 @@ def get_stock_data(ticker: str) -> dict[str, Any]:
             "pe_ratio": info.get("trailingPE", "N/A"),
             "eps": info.get("trailingEps", "N/A"),
             "market_cap": info.get("marketCap", "N/A"),
-            "history": hist
+            "history": hist.reset_index().to_dict("records")  # Convert to serializable format
         }
 
     except Exception as e:
-        log.error(f"🚨 Stock fetch failed for {ticker}: {str(e)}")
-        st.warning("⚠️ Stock data temporarily unavailable. Please try again later.")
-        return {}
+        log.exception(f"🚨 get_stock_data failed for {ticker}: {str(e)}")
+        return {
+            "name": ticker,
+            "price": "N/A",
+            "currency": "INR",
+            "pe_ratio": "N/A",
+            "eps": "N/A",
+            "market_cap": "N/A",
+            "history": []
+        }
+
 
 
 
