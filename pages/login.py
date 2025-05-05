@@ -4,44 +4,35 @@ import yaml
 from yaml.loader import SafeLoader
 from pathlib import Path
 
-# Load credentials from config
-with open(Path(__file__).parent.parent / "config" / "config.yaml", "r") as f:
-    config = yaml.load(f, Loader=SafeLoader)
+CONFIG_PATH = Path(__file__).parent.parent / "config" / "config.yaml"
 
-# Add your custom CSS here
+# Load config
+def load_config():
+    with open(CONFIG_PATH, "r") as f:
+        return yaml.load(f, Loader=SafeLoader)
+
+# Save config
+def save_config(config):
+    with open(CONFIG_PATH, "w") as f:
+        yaml.dump(config, f)
+
+config = load_config()
+
 st.markdown("""
 <style>
-/* === Background & Font === */
 html, body, .stApp {
     background-color: #fffbea !important;
     font-family: 'Segoe UI', sans-serif;
 }
-
-/* === Sidebar Gradient Match === */
 section[data-testid="stSidebar"] {
     background: linear-gradient(to bottom right, #fdf2d5, #fae1aa) !important;
     border-right: 2px solid #e5c97b !important;
-    box-shadow: 2px 0px 8px rgba(0, 0, 0, 0.05);
-    padding: 1rem;
 }
-
-/* === Sidebar Button (Logout / Login) === */
 .stButton > button {
     background: linear-gradient(135deg, #f1c40f, #f39c12);
     color: white !important;
     font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
 }
-.stButton > button:hover {
-    background: linear-gradient(135deg, #e67e22, #f39c12);
-    transform: scale(1.02);
-}
-
-/* === Login Form Area === */
 [data-testid="stForm"] {
     background-color: #fffdf2 !important;
     border: 1px solid #ffe69a !important;
@@ -49,28 +40,6 @@ section[data-testid="stSidebar"] {
     padding: 2rem;
     max-width: 480px;
     margin: 8vh auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
-
-/* === Inputs === */
-input, .stTextInput input, .stPasswordInput input {
-    background-color: #fffef8 !important;
-    border: 1px solid #f4d276 !important;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-/* === Welcome Message === */
-h1, h2, h3 {
-    color: #b37a00;
-    text-align: center;
-}
-
-/* === Notification Box Styling === */
-.stAlert {
-    border-radius: 8px;
-    font-size: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -78,9 +47,12 @@ h1, h2, h3 {
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
-if not st.session_state["authenticated"]:
+tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+
+# --- LOGIN TAB --- #
+with tab1:
     st.markdown("### 🔐 Login to Smart Tracker")
-    with st.form("login_form", clear_on_submit=False):
+    with st.form("login_form"):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         login_btn = st.form_submit_button("Login")
@@ -91,13 +63,38 @@ if not st.session_state["authenticated"]:
             st.session_state["authenticated"] = True
             st.session_state["username"] = username
             st.success(f"✅ Welcome {user['name']} 👋")
+            
         else:
-            st.session_state["authenticated"] = False
-            st.error("❌ Incorrect username or password. Please try again.")
-    st.stop()
+            st.error("❌ Incorrect username or password.")
+
+# --- REGISTER TAB --- #
+with tab2:
+    st.markdown("### 📝 Register New User")
+    with st.form("register_form"):
+        new_username = st.text_input("New Username")
+        full_name = st.text_input("Full Name")
+        email = st.text_input("Email")
+        new_password = st.text_input("New Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
+        register_btn = st.form_submit_button("Register")
+
+    if register_btn:
+        if new_username in config["credentials"]["usernames"]:
+            st.warning("⚠️ Username already exists.")
+        elif new_password != confirm_password:
+            st.warning("⚠️ Passwords do not match.")
+        else:
+            hashed_pw = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+            config["credentials"]["usernames"][new_username] = {
+                "name": full_name,
+                "email": email,
+                "password": hashed_pw
+            }
+            save_config(config)
+            st.success("✅ User registered! You can now log in.")
 
 # --- SHOW APP IF AUTHENTICATED --- #
-else:
+if st.session_state["authenticated"]:
     name = config['credentials']['usernames'][st.session_state["username"]]['name']
     st.sidebar.success(f"✅ Welcome, {name}")
     if st.sidebar.button("🚪 Logout"):

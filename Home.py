@@ -13,9 +13,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Redirect to login if not authenticated
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
-    st.warning("🔒 Please login to continue.")
+    st.warning("🔐 Please log in to access the Smart Tracker.")
     st.stop()
+
 
 if st.sidebar.button("🚪 Logout"):
     st.session_state.clear()
@@ -637,7 +639,106 @@ def get_stock_data(ticker: str) -> dict[str, Any]:
             "market_cap": "N/A",
             "history": []
         }
+def show_analytics() -> None:
+    """
+    Display analytics dashboard with transaction visualizations.
+    Shows pie charts and trends for income and expenses.
+    """
+    try:
+        log.info("Generating financial analytics")
+        df = get_transactions_data()
+        
+        if df.empty:
+            st.info("No transactions recorded yet. Add some transactions to see analytics!")
+            return
+            
+        df['Amount'] = pd.to_numeric(df['Amount'], errors='coerce') # type: ignore
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce') # type: ignore
+        
+        # Calculate totals
+        total_income = df[df['Type'] == 'Income']['Amount'].sum() # type: ignore 
+        total_expenses = df[df['Type'] == 'Expense']['Amount'].sum() # type: ignore
+        net_balance = total_income - total_expenses
+        
+        # Display metrics
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Income", f"Rs. {total_income:,.2f}", delta=None)
+        with col2:
+            st.metric("Total Expenses", f"Rs. {total_expenses:,.2f}", delta=None)
+        with col3:
+            st.metric("Net Balance", f"Rs. {net_balance:,.2f}", 
+                     delta=f"Rs. {net_balance:,.2f}", 
+                     delta_color="normal" if net_balance >= 0 else "inverse")
+        
+        if len(df) > 1:  # Only show charts if we have more than one transaction
+            # Income vs Expenses over time
+            df_grouped = df.groupby(['Date', 'Type'])['Amount'].sum().unstack(fill_value=0) # type: ignore
+            fig_timeline = px.line(df_grouped,  # type: ignore
+                                 title='Income vs Expenses Over Time',
+                                 labels={'value': 'Amount (Rs. )', 'variable': 'Type'})
+            
+            fig_timeline.update_layout( # type: ignore
+                plot_bgcolor='#fffbe6',
+                paper_bgcolor='#fffbe6',
+                font=dict(color='#333', size=14),
+                margin=dict(t=30, b=30, l=10, r=10),
+            )
+            st.plotly_chart(fig_timeline) # type: ignore
+            
+            
+            # Category breakdown for both income and expenses
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.subheader("Income Breakdown")
+                income_df = df[df['Type'] == 'Income']
+                if not income_df.empty:
+                    fig_income = px.pie(income_df, values='Amount', names='Category',  # type: ignore
+                                      title='Income by Category')
+                    fig_income.update_layout( # type: ignore
+                        paper_bgcolor='#fffbe6',
+                        font=dict(color='#333', size=14),
+                        margin=dict(t=30, b=30, l=10, r=10),
+                    )
+                    st.plotly_chart(fig_income) # type: ignore
+                else:
+                    st.info("No income transactions recorded yet.")
+            
+            with col2:
+                st.subheader("Expense Breakdown")
+                expense_df = df[df['Type'] == 'Expense']
+                if not expense_df.empty:
+                    fig_expense = px.pie( # type: ignore
+                        expense_df,
+                        values='Amount',
+                        names='Category',
+                        title='Expenses by Category',
+                        color_discrete_sequence=[
+                            '#f39c12', '#e67e22', '#d35400', '#f7c59f', '#f8b195',
+                            '#f67280', '#c06c84', '#6c5b7b'  # vibrant theme
+                        ]
+                    )
+                    fig_expense.update_layout( # type: ignore
+                        paper_bgcolor='#fffbe6',
+                        font=dict(color='#333', size=14),
+                        margin=dict(t=30, b=30, l=10, r=10),
+                    )
+                    st.plotly_chart(fig_expense) # type: ignore
 
+                else:
+                    st.info("No expense transactions recorded yet.")
+            
+            # Monthly summary
+            st.subheader("Monthly Summary")
+            monthly_summary = df.groupby([df['Date'].dt.strftime('%Y-%m'), 'Type'])['Amount'].sum().unstack(fill_value=0) # type: ignore
+            monthly_summary['Net'] = monthly_summary.get('Income', 0) - monthly_summary.get('Expense', 0) # type: ignore
+            st.dataframe(monthly_summary.style.format("Rs. {:,.2f}")) # type: ignore
+        
+        log.info("✅ Analytics visualizations generated successfully")
+    except Exception as e:
+        log.error(f"❌ Failed to generate analytics: {str(e)}")
+        st.error("Failed to generate analytics. Please try again later.")
 
 
 
