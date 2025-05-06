@@ -551,18 +551,18 @@ def parse_date_from_text(text: str) -> datetime:
 
 
 STOCK_NAME_MAP = {
-    "tcs": "TCS.NS",
-    "infosys": "INFY.NS",
-    "reliance": "RELIANCE.NS",
-    "hdfc": "HDFCBANK.NS",
-    "apple": "AAPL",
-    "google": "GOOGL",
-    "alphabet": "GOOGL",
-    "amazon": "AMZN",
-    "microsoft": "MSFT",
-    "meta": "META",
-    "tesla": "TSLA",
-    "nvidia": "NVDA"
+    "tcs": "TCS.BSE",               # Tata Consultancy Services (BSE listing)
+    "infosys": "INFY.BSE",          # Infosys Ltd (BSE)
+    "reliance": "RELIANCE.BSE",     # Reliance Industries (BSE)
+    "hdfc": "HDFCBANK.BSE",         # HDFC Bank (BSE)
+    "apple": "AAPL",                # Apple Inc
+    "google": "GOOGL",              # Alphabet Inc Class A
+    "alphabet": "GOOGL",            # Same as Google
+    "amazon": "AMZN",               # Amazon.com Inc
+    "microsoft": "MSFT",            # Microsoft Corporation
+    "meta": "META",                 # Meta Platforms Inc
+    "tesla": "TSLA",                # Tesla Inc
+    "nvidia": "NVDA"                # NVIDIA Corporation
 }
 
 def detect_stock_ticker(text: str) -> str | None:
