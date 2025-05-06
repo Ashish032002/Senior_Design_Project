@@ -43,6 +43,7 @@ from services.google_sheets import get_sheets_service
 import yfinance as yf
 
 
+
 log: Logger = setup_logging("expense_tracker")
 
 # Load environment variables
@@ -586,59 +587,46 @@ def detect_stock_ticker(text: str) -> str | None:
   
 
 
+import requests
+import pandas as pd
+
+ALPHA_VANTAGE_API_KEY = "SIWC4CFVQAZ8OCXG"  
+
 @st.cache_data(ttl=300)
 def get_stock_data(ticker: str) -> dict[str, Any]:
-    import time
-
-    def fetch_info_with_retries(stock, max_retries=3, delay=2):
-        for attempt in range(max_retries):
-            try:
-                info = stock.info
-                if info and "shortName" in info:
-                    return info
-            except Exception as e:
-                log.warning(f"Attempt {attempt+1}: stock.info failed for {ticker}: {e}")
-                time.sleep(delay)
-        return {}
-
     try:
-        stock = yf.Ticker(ticker)
-        hist = stock.history(period="1mo")
+        # Call Alpha Vantage
+        url = f"https://www.alphavantage.co/query"
+        params = {
+            "function": "TIME_SERIES_DAILY",
+            "symbol": ticker,
+            "apikey": ALPHA_VANTAGE_API_KEY
+        }
+        response = requests.get(url, params=params)
+        data = response.json()
 
-        if hist is None or hist.empty:
-            log.error(f"❌ No historical data for {ticker}")
-            return {
-                "name": ticker,
-                "price": "N/A",
-                "currency": "INR",
-                "pe_ratio": "N/A",
-                "eps": "N/A",
-                "market_cap": "N/A",
-                "history": pd.DataFrame()  # Safe default
-            }
+        if "Time Series (Daily)" not in data:
+            log.error(f"❌ Alpha Vantage returned no data for: {ticker}")
+            return {}
 
-        info = fetch_info_with_retries(stock)
+        df = pd.DataFrame.from_dict(data["Time Series (Daily)"], orient="index", dtype=float)
+        df.index = pd.to_datetime(df.index)
+        df.sort_index(inplace=True)
+
         return {
-            "name": info.get("shortName", ticker),
-            "price": info.get("currentPrice", hist['Close'].iloc[-1]),
-            "currency": info.get("currency", "INR"),
-            "pe_ratio": info.get("trailingPE", "N/A"),
-            "eps": info.get("trailingEps", "N/A"),
-            "market_cap": info.get("marketCap", "N/A"),
-            "history": hist.reset_index().to_dict("records")  # Convert to serializable format
+            "name": ticker,  # Alpha Vantage doesn't return full name
+            "price": df["4. close"].iloc[-1],
+            "currency": "INR",
+            "pe_ratio": "N/A",  # Not provided by free Alpha Vantage tier
+            "eps": "N/A",
+            "market_cap": "N/A",
+            "history": df.rename(columns={"4. close": "Close"})
         }
 
     except Exception as e:
-        log.exception(f"🚨 get_stock_data failed for {ticker}: {str(e)}")
-        return {
-            "name": ticker,
-            "price": "N/A",
-            "currency": "INR",
-            "pe_ratio": "N/A",
-            "eps": "N/A",
-            "market_cap": "N/A",
-            "history": []
-        }
+        log.error(f"🚨 Stock fetch failed: {str(e)}")
+        return {}
+    
 def show_analytics() -> None:
     """
     Display analytics dashboard with transaction visualizations.
@@ -1885,8 +1873,7 @@ def main():
             st.subheader(f"📊 Stock Details: {stock['name']} ({ticker})")
             st.markdown(f"""
                 - 💵 **Price**: `{stock['price']} {stock['currency']}`
-                - 📊 **P/E**: `{stock['pe_ratio']}` | **EPS**: `{stock['eps']}`
-                - 🏦 **Market Cap**: `{stock['market_cap']}`
+                
             """)
             fig = px.line(stock['history'], y="Close", title=f"{ticker} Price Trend")
             st.plotly_chart(fig, use_container_width=True)
